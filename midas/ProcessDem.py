@@ -12,6 +12,7 @@ import glob
 from io import StringIO
 from datetime import datetime
 from collections import defaultdict
+import shlex
 
 
 def GetODotaMatchData(MatchIds: list):
@@ -81,10 +82,23 @@ def GetPosition(matches: list):
     (output, err) = p.communicate()
     # This makes the wait possible
     p_status = p.wait()
-    p = subprocess.Popen("java -jar target/position.one-jar.jar \"/Volumes/GoogleDrive/My Drive/Tilburg/Year 3/Internship/midas/midas/6522221361.dem\"", shell = True,cwd = './clarity-examples')
-    (output, err) = p.communicate()
+    ctr = 1;
+    positionDict = {}
+    for file in replayFiles[1:]:
+        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
+        curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
+        #print(curDir)
+        p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
+        #p = subprocess.check_output(["java", "-jar", "target/position.one-jar.jar", curDir], cwd='./clarity-examples')
+        output, err = p.communicate()
+        positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
+        #print(type(output))
+        p_status = p.wait()
+        ctr+=1
+    return positionDict
     # This makes the wait possible
-    p_status = p.wait()
+    # p_status = p.wait()
+    # print(type(output))
 def CheckJava():
     p1 = subprocess.run('java --version', shell=True, capture_output=True)
     print("Checking if Java is installed - required for the Clarity parser..")
@@ -124,6 +138,6 @@ def CheckDems():
             replayFiles.append(file)
     return replayFiles
 
-matchData = GetODotaMatchData([6212505052,6522221361])
-DownloadReplays(matchData)
-GetPosition([6212505052, 6522221361])
+#matchData = GetODotaMatchData([6212505052,6522221361])
+#DownloadReplays(matchData)
+#print(GetPosition([6212505052, 6522221361]).keys())
