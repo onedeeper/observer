@@ -1,5 +1,4 @@
 import subprocess
-
 import requests
 import json
 import os
@@ -14,7 +13,6 @@ from datetime import datetime
 from collections import defaultdict
 import shlex
 
-
 def GetODotaMatchData(MatchIds: list):
     """
     :param MatchIds:
@@ -28,14 +26,15 @@ def GetODotaMatchData(MatchIds: list):
         # print(r.keys())
         print('Fetching match {}/{}'.format(ctr, len(MatchIds)))
         completeMatchMetails[match] = r
-        time.sleep(11)
+        # OpenAPI has a max number of calls per minute
+        if len(matchIds) > 60:
+            time.sleep(11)
         ctr += 1
     return (completeMatchMetails)
 
-
 def DownloadReplays(matches: list):
     """
-    Downloads match files in .bz2 format and extracts the files on to disk.
+    Downloads match files in .bz2 format and extracts the files on to disk in the current working director
 
     :param matches: List of matchIds to download replays of
     :return: none
@@ -60,45 +59,6 @@ def DownloadReplays(matches: list):
         os.system("bzip2 -d {}".format(file))
         fileCount += 1
 
-
-def GetPosition(matches: list):
-    """
-    Reads replay files and extracts position data for each player across a match using
-    the clarity parser : https://github.com/skadistats/clarity
-
-    :param matches:
-    :return:
-    """
-    if not CheckJava():
-        return
-    CheckClarity()
-    replayFiles = CheckDems()
-    if not replayFiles[0]:
-        return
-    print("{} replays found.".format(len(replayFiles[1:])))
-    print("Building package...")
-    #subprocess.Popen(, shell=True, cwd='./clarity-examples')
-    p = subprocess.Popen('mvn -P position package', stdout=subprocess.PIPE, shell=True, cwd='./clarity-examples')
-    (output, err) = p.communicate()
-    # This makes the wait possible
-    p_status = p.wait()
-    ctr = 1;
-    positionDict = {}
-    for file in replayFiles[1:]:
-        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
-        curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
-        #print(curDir)
-        p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
-        #p = subprocess.check_output(["java", "-jar", "target/position.one-jar.jar", curDir], cwd='./clarity-examples')
-        output, err = p.communicate()
-        positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
-        #print(type(output))
-        p_status = p.wait()
-        ctr+=1
-    return positionDict
-    # This makes the wait possible
-    # p_status = p.wait()
-    # print(type(output))
 def CheckJava():
     p1 = subprocess.run('java --version', shell=True, capture_output=True)
     print("Checking if Java is installed - required for the Clarity parser..")
@@ -129,15 +89,11 @@ def CheckDems():
     p1 = subprocess.run('ls', shell=True, capture_output=True)
     if '.dem' not in p1.stdout.decode("utf-8"):
         print("No .dem files found in current directory")
-        print("Try using the DownloadReplays function to get some replays")
-        return False
+        print("Try using the DownloadReplays function to get some replays or place replays (.dem files) in the current directory.")
+        return [False]
     files = p1.stdout.decode("utf-8").split()
     replayFiles = [True]
     for file in files:
         if '.dem' in file:
             replayFiles.append(file)
     return replayFiles
-
-#matchData = GetODotaMatchData([6212505052,6522221361])
-#DownloadReplays(matchData)
-#print(GetPosition([6212505052, 6522221361]).keys())

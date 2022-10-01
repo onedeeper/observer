@@ -1,0 +1,11 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+obs/__init__.py
+obs/examples.py
+obs/utils.py
+observer.egg-info/PKG-INFO
+observer.egg-info/SOURCES.txt
+observer.egg-info/dependency_links.txt
+observer.egg-info/top_level.txt
