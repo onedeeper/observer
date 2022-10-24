@@ -24,10 +24,10 @@ def GetODotaMatchData(MatchIds: list):
     for match in MatchIds:
         r = requests.get("https://api.opendota.com/api/matches/{}".format(match)).json()
         # print(r.keys())
-        print('Fetching match {}/{}'.format(ctr, len(MatchIds)))
+        print('Fetching match {}/{}'.format(ctr, len(MatchIds)), end="\r", flush=True)
         completeMatchMetails[match] = r
         # OpenAPI has a max number of calls per minute
-        if len(matchIds) > 60:
+        if len(MatchIds) > 60:
             time.sleep(11)
         ctr += 1
     return (completeMatchMetails)
@@ -48,14 +48,16 @@ def DownloadReplays(matches: list):
         return
     for match in matches:
         extType = str(match) + ".dem.bz2"
-        fileNames.append(extType);
+        fileNames.append(extType)
         print("downloading replay {}/{} ...".format(ctr, len(matches)))
-        urllib.request.urlretrieve(matches[match]['replay_url'], extType)
+        urllib.request.urlretrieve(matches[match]["replay_url"], extType)
         ctr += 1
     print("Done.")
     fileCount = 1
     for file in fileNames:
         print("Decompressing file {}/{}".format(fileCount, len(fileNames)))
+        if os.path.getsize(file) == 0:
+            print('File {} is empty'.format(file))
         os.system("bzip2 -d {}".format(file))
         fileCount += 1
 
