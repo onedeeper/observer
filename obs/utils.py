@@ -22,14 +22,17 @@ def GetODotaMatchData(MatchIds: list):
     completeMatchMetails = dict()
     ctr = 1
     for match in MatchIds:
-        r = requests.get("https://api.opendota.com/api/matches/{}".format(match)).json()
-        # print(r.keys())
-        print('Fetching match {}/{}'.format(ctr, len(MatchIds)), end="\r", flush=True)
-        completeMatchMetails[match] = r
-        # OpenAPI has a max number of calls per minute
-        if len(MatchIds) > 60:
-            time.sleep(11)
-        ctr += 1
+        try:
+            r = requests.get("https://api.opendota.com/api/matches/{}".format(match)).json()
+            # print(r.keys())
+            print('Fetching match {}/{}'.format(ctr, len(MatchIds)), end="\r", flush=True)
+            completeMatchMetails[match] = r
+            # OpenAPI has a max number of calls per minute
+            if len(MatchIds) > 60:
+                time.sleep(11)
+            ctr += 1
+        except:
+            continue
     return (completeMatchMetails)
 
 def DownloadReplays(matches: list):
