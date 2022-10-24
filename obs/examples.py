@@ -43,6 +43,9 @@ def GetPosition(matches: list):
     #print("test")
     for file in replayFiles[1:]:
         print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
+        if os.path.getsize(file) == 0:
+            print('File {} is empty'.format(file))
+            continue
         curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
         #print(curDir)
         p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
