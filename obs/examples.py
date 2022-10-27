@@ -16,7 +16,7 @@ import shlex
 import obs.utils
 
 
-def GetPosition(matches: list):
+def GetPosition(matches = []):
     """
     Reads replay files and extracts position data for each player across a match using
     the clarity parser : https://github.com/skadistats/clarity
@@ -24,13 +24,12 @@ def GetPosition(matches: list):
     :param matches:
     :return:
     """
+
+    # TODO : implement ability to parse selected files.
     if not obs.utils.CheckJava():
         return
     obs.utils.CheckClarity()
     replayFiles = obs.utils.CheckDems()
-    print("Checking for replays in current directory..")
-    if not replayFiles[0]:
-        return
     print("{} replays found.".format(len(replayFiles[1:])))
     print("Building package...")
     #subprocess.Popen(, shell=True, cwd='./clarity-examples')
@@ -42,10 +41,10 @@ def GetPosition(matches: list):
     positionDict = {}
     #print("test")
     for file in replayFiles[1:]:
-        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
-        if os.path.getsize(file) == 0:
-            print('File {} is empty'.format(file))
-            continue
+        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])), end="\r", flush=True)
+        # if os.path.getsize(file) == 0:
+        #     print('File {} is empty'.format(file))
+        #     continue
         curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
         #print(curDir)
         p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
@@ -57,12 +56,19 @@ def GetPosition(matches: list):
         ctr+=1
     matchCoordsDict = {}
     for matchId in positionDict.keys():
-        # skip the first 10 rows which gives player assignments, not location
-        series = pd.Series(positionDict[matchId][10:])
-        df = series.str.split(',', expand=True)
-        df = df.rename(columns={0: "Player", 1: "X", 2: "Y", 3: "Z", 4: "Time"})
-        # skip the last 2 rows which gives info about how long the parsing took
-        matchCoordsDict[matchId] = df.iloc[0:-2]
+        try:
+            # skip the first 10 rows which gives player assignments, not location
+            # TODO : Implement change so that dynamically determines last position entry
+            series = pd.Series(positionDict[matchId])
+            firstPos = series.str.contains('_').idxmax()
+            series = series[firstPos:].reset_index(drop = True)
+            df = series.str.split(',', expand=True)
+            df = df.rename(columns={0: "Player", 1: "X", 2: "Y", 3: "Z", 4: "Time"})
+            # skip the last row which gives info about how long the parsing took
+            matchCoordsDict[matchId] = df.iloc[0:-2]
+        except:
+            print(matchId, series)
+            continue
     return matchCoordsDict
 
     # This makes the wait possible

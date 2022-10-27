@@ -52,13 +52,13 @@ def DownloadReplays(matches: list):
     for match in matches:
         extType = str(match) + ".dem.bz2"
         fileNames.append(extType)
-        print("downloading replay {}/{} ...".format(ctr, len(matches)))
+        print("downloading replay {}/{} ...".format(ctr, len(matches)) , end="\r", flush=True)
         urllib.request.urlretrieve(matches[match]["replay_url"], extType)
         ctr += 1
     print("Done.")
     fileCount = 1
     for file in fileNames:
-        print("Decompressing file {}/{}".format(fileCount, len(fileNames)))
+        print("Decompressing file {}/{}".format(fileCount, len(fileNames)), end="\r", flush=True)
         if os.path.getsize(file) == 0:
             print('File {} is empty'.format(file))
         os.system("bzip2 -d {}".format(file))
