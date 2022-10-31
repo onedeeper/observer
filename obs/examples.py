@@ -42,8 +42,8 @@ def GetPosition(matches = []):
     #print("test")
     ## TODO : Parallelize this
     for file in replayFiles[1:]:
-        if ctr > 5:
-            break
+      # if ctr > 5:
+        #     break
         print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])), end="\r", flush=True)
         # if os.path.getsize(file) == 0:
         #     print('File {} is empty'.format(file))
