@@ -44,7 +44,6 @@ def GetPosition(matches = []):
     for file in replayFiles[1:]:
       # if ctr > 5:
         #     break
-        print('here')
         print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
         # if os.path.getsize(file) == 0:
         #     print('File {} is empty'.format(file))
