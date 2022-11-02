@@ -44,7 +44,8 @@ def GetPosition(matches = []):
     for file in replayFiles[1:]:
       # if ctr > 5:
         #     break
-        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])), end="\r", flush=True)
+        print('here')
+        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
         # if os.path.getsize(file) == 0:
         #     print('File {} is empty'.format(file))
         #     continue
@@ -66,7 +67,7 @@ def GetPosition(matches = []):
         try:
             # skip the first 10 rows which gives player assignments, not location
             # TODO : Implement change so that dynamically determines last position entry
-            print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())), end="\r", flush=True)
+            print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())))
             series = pd.Series(positionDict[matchId])
             firstPos = series.str.contains('_').idxmax()
             series = series[firstPos:].reset_index(drop = True)
@@ -84,7 +85,7 @@ def GetPosition(matches = []):
     matchDict = {}
     matchCtr = 1
     for match in results:
-        print("Sampling match {}/{}".format(matchCtr, len(results)),end="\r", flush=True)
+        print("Sampling match {}/{}".format(matchCtr, len(results)))
         results[match]['Time'] = pd.to_numeric(results[match]['Time'])
         firstTs = abs(results[match].iloc[0]['Time'])
         # convert each recording to milliseconds
