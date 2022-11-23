@@ -65,7 +65,7 @@ def DownloadReplays(matches: list):
         fileCount += 1
 
 def CheckJava():
-    p1 = subprocess.run('java --version', shell=True, capture_output=True)
+    p1 = subprocess.run('java -version', shell=True, capture_output=True)
     print("Checking if Java is installed - required for the Clarity parser..")
     if p1.returncode != 0:
         print("Java installation not found.")
