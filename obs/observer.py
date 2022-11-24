@@ -23,18 +23,19 @@ def GetPosition(matches = []):
     :param matches:
     :return:
     """
-
-    # TODO : implement ability to parse selected files.
     if not obs.utils.CheckJava():
         return
     obs.utils.CheckClarity()
-    replayFiles = obs.utils.CheckDems()
-    print("{} replays found.".format(len(replayFiles[1:])))
+    if len(matches) == 0:
+        replayFiles = obs.utils.CheckDems()
+        print("{} replays found.".format(len(replayFiles[1:])))
+    else:
+        replayFiles = [ str(match)+".dem"for match in matches]
     ctr = 1;
     positionDict = {}
     ## TODO : Parallelize this
-    for file in replayFiles[1:]:
-        print("Parsing file {}/{}..".format(ctr,len(replayFiles[1:])))
+    for file in replayFiles:
+        print("Parsing file {}/{}..".format(ctr,len(replayFiles)))
         curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
         p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
         output, err = p.communicate()

@@ -3,7 +3,7 @@ README.md
 pyproject.toml
 setup.cfg
 obs/__init__.py
-obs/examples.py
+obs/observer.py
 obs/utils.py
 observer.egg-info/PKG-INFO
 observer.egg-info/SOURCES.txt
