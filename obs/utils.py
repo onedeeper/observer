@@ -42,6 +42,7 @@ def DownloadReplays(matches: list):
     :param matches: List of matchIds to download replays of
     :return: none
     """
+    matches = GetODotaMatchData(matches)
     ctr = 1
     fileNames = [];
     print("WARNING : Files will download to current working directory.")
@@ -52,13 +53,13 @@ def DownloadReplays(matches: list):
     for match in matches:
         extType = str(match) + ".dem.bz2"
         fileNames.append(extType)
-        print("downloading replay {}/{} ...".format(ctr, len(matches)) , end="\r", flush=True)
+        print("downloading replay {}/{} ...".format(ctr, len(matches)))
         urllib.request.urlretrieve(matches[match]["replay_url"], extType)
         ctr += 1
     print("Done.")
     fileCount = 1
     for file in fileNames:
-        print("Decompressing file {}/{}".format(fileCount, len(fileNames)), end="\r", flush=True)
+        print("Decompressing file {}/{}".format(fileCount, len(fileNames)))
         if os.path.getsize(file) == 0:
             print('File {} is empty'.format(file))
         os.system("bzip2 -d {}".format(file))

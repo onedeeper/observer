@@ -31,6 +31,10 @@ def GetPosition(matches = []):
         print("{} replays found.".format(len(replayFiles[1:])))
     else:
         replayFiles = [ str(match)+".dem"for match in matches]
+        files_in_dir = os.listdir()
+        if not all(elem in files_in_dir for elem in replayFiles):
+            print("Replay files not found. Downloading replays.")
+            obs.utils.DownloadReplays(matches)
     ctr = 1;
     positionDict = {}
     ## TODO : Parallelize this
