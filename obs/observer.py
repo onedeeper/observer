@@ -28,12 +28,12 @@ def GetPosition(matches = []):
     obs.utils.CheckClarity()
     if len(matches) == 0:
         replayFiles = obs.utils.CheckDems()
-        print("{} replays found.".format(len(replayFiles[1:])))
+        print("{} replays found.".format(len(replayFiles)))
     else:
         replayFiles = [ str(match)+".dem"for match in matches]
         files_in_dir = os.listdir()
         if not all(elem in files_in_dir for elem in replayFiles):
-            print("Replay files not found. Downloading replays.")
+            print("Specified replay files not found. Downloading replays.")
             obs.utils.DownloadReplays(matches)
     ctr = 1;
     positionDict = {}
@@ -43,6 +43,10 @@ def GetPosition(matches = []):
         curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
         p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
         output, err = p.communicate()
+        print("Output : {}".format(output.decode("utf-8")))
+        if output.decode("utf-8") == "":
+            print("Java Runtime Error. Please make sure a Java Runtime Environment is installed, path is defined, etc.")
+            return
         positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
         p_status = p.wait()
         ctr+=1

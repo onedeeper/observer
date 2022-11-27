@@ -96,9 +96,9 @@ def CheckDems():
     if '.dem' not in p1.stdout.decode("utf-8"):
         print("No .dem files found in current directory")
         print("Try using the DownloadReplays function to get some replays or place replays (.dem files) in the current directory.")
-        return [False]
+        return
     files = p1.stdout.decode("utf-8").split()
-    replayFiles = [True]
+    replayFiles = []
     for file in files:
         if '.dem' in file:
             replayFiles.append(file)
