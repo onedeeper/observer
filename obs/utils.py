@@ -84,7 +84,7 @@ def CheckClarity():
         toContinue = input(
             "WARNING : Clarity parser will be downloaded from Github to current directory.\nContinue? [y/n]")
         if toContinue == 'n':
-            return
+            return False
         print("Cloning...")
         p1 = subprocess.run('git clone https://github.com/onedeeper/clarity-examples.git', shell=True)
     print("Clarity found.")

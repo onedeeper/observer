@@ -103,9 +103,9 @@ def SampleFromMatches(results : dict):
     """
     matchDict = {}
     matchCtr = 1
-    try:
-        for match in results:
-            print("Sampling match {}/{}".format(matchCtr, len(results)))
+    for match in results:
+        print("Sampling match {}/{}".format(matchCtr, len(results)))
+        try:
             results[match]['time'] = pd.to_numeric(results[match]['time'])
             firstTs = abs(results[match].iloc[0]['time'])
             # convert each recording to milliseconds
@@ -133,9 +133,9 @@ def SampleFromMatches(results : dict):
                 playerDict[player] = df
             matchCtr += 1
             matchDict[match] = playerDict
-        print()
-        return matchDict
-    except:
-        print("Error sampling match {}. Dataframe of length {}".format(match, len(results[match])))
-        matchCtr += 1
-        return
+        except:
+            print("Error sampling match {}. Dataframe of length {}".format(match, len(results[match])))
+            matchCtr += 1
+            continue
+    print("Done.")
+    return matchDict
