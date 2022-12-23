@@ -1,5 +1,4 @@
 
-
 # Observer : Dota 2 Time Series Data
 
 The goal of this package is to parse a Dota 2 replay and return time-locked information about all 10 heroes in the game.
@@ -21,8 +20,6 @@ I have used this package to generate time series data for all of the Internation
 
 None of this would be possible with the parser built by [Martin Schrodt](https://github.com/spheenik) 
 
-** MARTIN HAS NOT ENDORSED OR IS RESPONSIBLE FOR ANYTHING IN THIS CODE **
-
 For the Clarity parser, Martin has generated several [examples](https://github.com/skadistats/clarity-examples), including one for position. I have [forked](https://github.com/onedeeper/clarity-examples) this example and modified it to suit my needs. 
 
 Observer uses this code to parse each replay file using some shell commands. The captured output is then modified in the python code which produces the output.
@@ -31,7 +28,7 @@ Observer uses this code to parse each replay file using some shell commands. The
 
 ### Dependencies
 
-ONLY WORKS ON MAC/LINUX
+**Observer currently only works on mac/linux environments**
 
 Need a java runtime environment 
 Built on : 
@@ -78,7 +75,7 @@ Udesh Habaraduwa
 
 ## License
 
-This project is licensed under the BSD 3-Clause License - see the LICENSE.md file for details
+This project is licensed under the MIT License - see the LICENSE.md file for details
 
 ## Acknowledgments
 
