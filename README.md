@@ -39,8 +39,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.351-b10, mixed mode)
 
 ### Installing
 
-Clone this repo
-cd into the directory
+Clone this repo , go into the directory
 
     pip install . 
 
