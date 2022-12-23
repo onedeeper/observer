@@ -1,4 +1,5 @@
 
+
 # Observer : Dota 2 Time Series Data
 
 The goal of this package is to parse a Dota 2 replay and return time-locked information about all 10 heroes in the game.
@@ -39,7 +40,8 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.351-b10, mixed mode)
 
 ### Installing
 
-Clone this repo , go into the directory
+Clone this repo
+cd into the directory
 
     pip install . 
 
@@ -54,7 +56,6 @@ From where you're working (notebook, py file):
 Observer first downloads the clarity-examples package from my forked repo to the current working directory. This includes pre-built maven package as well so you don't have to build anything. 
 
 If you want to get different information about a hero, I direct you to [Martin's readme](https://github.com/onedeeper/clarity-examples) on the clarity parser. There, you will be able to learn how to investigate the "send tables" and change the variables (i.e the columns of the dataframes that is finally returned. Ofcourse, this is going to require extensive surgery to Observer which is hard-coded to handle only the variables that I've selected.
-```
 
 ## Help
 
