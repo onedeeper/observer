@@ -21,7 +21,7 @@ def GetPosition(matches = []):
     the clarity parser : https://github.com/skadistats/clarity
 
     :param matches : list of match ids to parse as integers
-    :return:
+    :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
     isint = lambda x: all(isinstance(item, int) for item in x)
     if not isint(matches):
@@ -47,7 +47,11 @@ def ParseFiles(replayFiles : list):
 
     """
     Parses replay files and extracts position data for each player across a match using
-    the clarity parser"""
+    the clarity parser
+
+    :param replayFiles : list of replay files to parse
+    :return: a double dictionary of match ids, player ids, and dataframes of position data
+    """
     positionDict = {}
     ctr = 1
     for file in replayFiles:
@@ -70,7 +74,7 @@ def BuildDataFrames(positionDict : dict):
     """
     builds dataframes from the position data extracted from the replay files
     :param positionDict:
-    :return:
+    :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
     results = {}
     ctr = 1
@@ -103,7 +107,7 @@ def SampleFromMatches(results : dict):
     Samples at 200ms for each player in each match
     :param
     :param results:
-    :return:
+    :return:  a double dictionary of match ids, player ids, and dataframes of position data
     """
     matchDict = {}
     matchCtr = 1

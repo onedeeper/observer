@@ -15,7 +15,7 @@ import shlex
 
 def GetODotaMatchData(MatchIds: list):
     """
-    :param MatchIds:
+    :param MatchIds: List of matchIds to get data for
     :return: A dictionary containing match details retrieved from opendota.com
     """
     matchUrlDataDict = dict()
@@ -66,6 +66,10 @@ def DownloadReplays(matches: list):
         fileCount += 1
 
 def CheckJava():
+    """
+    Checks if java is installed on the system
+    :return: True if java is installed, False otherwise
+    """
     p1 = subprocess.run('java -version', shell=True, capture_output=True)
     print("Checking if Java is installed - required for the Clarity parser..")
     if p1.returncode != 0:
@@ -76,6 +80,10 @@ def CheckJava():
     return True
 
 def CheckClarity():
+    """
+    Checks if clarity exists in the current working directory
+    :return: True if clarity exists, False otherwise
+    """
     print("Checking for Clarity...")
     p1 = subprocess.run('ls', shell=True, capture_output=True)
     # print(str(p1.stdout))
@@ -91,6 +99,10 @@ def CheckClarity():
     return True
 
 def CheckDems():
+    """
+    Checks if there are any .dem files in the current working directory
+    :return:  Returns a list of .dem files in the current working directory
+    """
     print("Checking for replays in current directory..")
     p1 = subprocess.run('ls', shell=True, capture_output=True)
     if '.dem' not in p1.stdout.decode("utf-8"):
