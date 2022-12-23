@@ -21,6 +21,8 @@ I have used this package to generate time series data for all of the Internation
 
 None of this would be possible with the parser built by [Martin Schrodt](https://github.com/spheenik) 
 
+** MARTIN HAS NOT ENDORSED OR IS RESPONSIBLE FOR ANYTHING IN THIS CODE **
+
 For the Clarity parser, Martin has generated several [examples](https://github.com/skadistats/clarity-examples), including one for position. I have [forked](https://github.com/onedeeper/clarity-examples) this example and modified it to suit my needs. 
 
 Observer uses this code to parse each replay file using some shell commands. The captured output is then modified in the python code which produces the output.
