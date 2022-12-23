@@ -64,7 +64,7 @@ def ParseFiles(replayFiles : list):
         output, err = p.communicate()
         #print("Output : {}".format(output.decode("utf-8")))
         if output.decode("utf-8") == "":
-            print("Java Runtime Error. Please make sure a Java Runtime Environment is installed, path is defined, etc.")
+            print("Java Runtime Error. Please make sure a Java Runtime Environment is installed and can be found or the matchIDs are correct/exist")
             return
         positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
         p_status = p.wait()

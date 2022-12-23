@@ -23,16 +23,21 @@ def GetODotaMatchData(matchIds: list):
     matchUrlDataDict = dict()
     completeMatchMetails = dict()
     ctr = 1
+    print("Getting match details from opendota.com...")
     for match in matchIds:
         try:
-            r = requests.get("https://api.opendota.com/api/matches/{}".format(match)).json()
-            print('Fetching match {}/{}'.format(ctr, len(matchIds)), end="\r", flush=True)
-            completeMatchMetails[match] = r
+            r = requests.get("https://api.opendota.com/api/matches/{}".format(match))
+            if r.status_code == 404:
+                #print('test')
+                raise RuntimeError('Error : {} cannot be retrieved or does not exist '.format(match))
+            print('Fetching match {}/{}'.format(ctr, len(matchIds)))
+            completeMatchMetails[match] = r.json()
             # OpenAPI has a max number of calls per minute
             if len(matchIds) > 60:
                 time.sleep(11)
             ctr += 1
-        except:
+        except Exception as e:
+            print(e)
             continue
     return (completeMatchMetails)
 
