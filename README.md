@@ -31,6 +31,8 @@ Observer uses this code to parse each replay file using some shell commands. The
 
 ### Dependencies
 
+ONLY WORKS ON MAC/LINUX
+
 Need a java runtime environment 
 Built on : 
 
