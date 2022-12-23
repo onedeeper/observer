@@ -15,30 +15,28 @@ import shlex
 import obs.utils
 
 
-def GetPosition(matches = []):
+def GetPosition(matchIds = []):
     """
     Reads replay files and extracts position data for each player across a match using
     the clarity parser : https://github.com/skadistats/clarity
 
-    :param matches : list of match ids to parse as integers
+    :param matchIds : list of match ids to parse as integers
     :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
-    isint = lambda x: all(isinstance(item, int) for item in x)
-    if not isint(matches):
-        print("Error : Matches must be a list of integers")
+    if not obs.utils.CheckInts(matchIds):
         return
     if not obs.utils.CheckJava():
         return
     obs.utils.CheckClarity()
-    if len(matches) == 0:
+    if len(matchIds) == 0:
         replayFiles = obs.utils.CheckDems()
         print("{} replays found.".format(len(replayFiles)))
     else:
-        replayFiles = [ str(match)+".dem"for match in matches]
+        replayFiles = [str(match) +".dem" for match in matchIds]
         files_in_dir = os.listdir()
         if not all(elem in files_in_dir for elem in replayFiles):
             print("Specified replay files not found. Downloading replays.")
-            obs.utils.DownloadReplays(matches)
+            obs.utils.DownloadReplays(matchIds)
     positionDict = ParseFiles(replayFiles)
     results = BuildDataFrames(positionDict)
     sampledResults = SampleFromMatches(results)

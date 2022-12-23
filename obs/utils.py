@@ -13,36 +13,39 @@ from datetime import datetime
 from collections import defaultdict
 import shlex
 
-def GetODotaMatchData(MatchIds: list):
+def GetODotaMatchData(matchIds: list):
     """
-    :param MatchIds: List of matchIds to get data for
+    :param matchIds: List of matchIds to get data for
     :return: A dictionary containing match details retrieved from opendota.com
     """
+    if not CheckInts(matchIds):
+        return
     matchUrlDataDict = dict()
     completeMatchMetails = dict()
     ctr = 1
-    for match in MatchIds:
+    for match in matchIds:
         try:
             r = requests.get("https://api.opendota.com/api/matches/{}".format(match)).json()
-            # print(r.keys())
-            print('Fetching match {}/{}'.format(ctr, len(MatchIds)), end="\r", flush=True)
+            print('Fetching match {}/{}'.format(ctr, len(matchIds)), end="\r", flush=True)
             completeMatchMetails[match] = r
             # OpenAPI has a max number of calls per minute
-            if len(MatchIds) > 60:
+            if len(matchIds) > 60:
                 time.sleep(11)
             ctr += 1
         except:
             continue
     return (completeMatchMetails)
 
-def DownloadReplays(matches: list):
+def DownloadReplays(matchIds: list):
     """
     Downloads match files in .bz2 format and extracts the files on to disk in the current working director
 
-    :param matches: List of matchIds to download replays of
+    :param matchIds: List of matchIds to download replays of
     :return: none
     """
-    matches = GetODotaMatchData(matches)
+    if not CheckInts(matchIds):
+        return
+    matchIds = GetODotaMatchData(matchIds)
     ctr = 1
     fileNames = [];
     print("WARNING : Files will download to current working directory.")
@@ -50,11 +53,11 @@ def DownloadReplays(matches: list):
     if answer == 'n':
         print("Exiting.")
         return
-    for match in matches:
+    for match in matchIds:
         extType = str(match) + ".dem.bz2"
         fileNames.append(extType)
-        print("downloading replay {}/{} ...".format(ctr, len(matches)))
-        urllib.request.urlretrieve(matches[match]["replay_url"], extType)
+        print("downloading replay {}/{} ...".format(ctr, len(matchIds)))
+        urllib.request.urlretrieve(matchIds[match]["replay_url"], extType)
         ctr += 1
     print("Done.")
     fileCount = 1
@@ -115,3 +118,15 @@ def CheckDems():
         if '.dem' in file:
             replayFiles.append(file)
     return replayFiles
+
+def CheckInts(matchIds : list):
+    """
+    Checks if a list of integers
+    :param matchIds: List of matchIds to check
+    :return: True if all elements are integers, False otherwise
+    """
+    isint = lambda x: all(isinstance(item, int) for item in x)
+    if not isint(matchIds):
+        print("Error : Matches must be a list of integers")
+        return False
+    return True
