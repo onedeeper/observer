@@ -36,6 +36,11 @@ def GetPosition(matchIds = []):
         files_in_dir = os.listdir()
         if not all(elem in files_in_dir for elem in replayFiles):
             print("Specified replay files not found. Downloading replays.")
+            print("WARNING : Files will download to current working directory.")
+            answer = input("Continue? [y/n]")
+            if answer == 'n':
+                print("Exiting.")
+                return
             obs.utils.DownloadReplays(matchIds)
     positionDict = ParseFiles(replayFiles)
     results = BuildDataFrames(positionDict)

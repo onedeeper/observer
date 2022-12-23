@@ -48,11 +48,7 @@ def DownloadReplays(matchIds: list):
     matchIds = GetODotaMatchData(matchIds)
     ctr = 1
     fileNames = [];
-    print("WARNING : Files will download to current working directory.")
-    answer = input("Continue? [y/n]")
-    if answer == 'n':
-        print("Exiting.")
-        return
+    print ("Downloading replays to current working directory..")
     for match in matchIds:
         extType = str(match) + ".dem.bz2"
         fileNames.append(extType)
