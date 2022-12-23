@@ -20,9 +20,13 @@ def GetPosition(matches = []):
     Reads replay files and extracts position data for each player across a match using
     the clarity parser : https://github.com/skadistats/clarity
 
-    :param matches:
+    :param matches : list of match ids to parse as integers
     :return:
     """
+    isint = lambda x: all(isinstance(item, int) for item in x)
+    if not isint(matches):
+        print("Error : Matches must be a list of integers")
+        return
     if not obs.utils.CheckJava():
         return
     obs.utils.CheckClarity()
