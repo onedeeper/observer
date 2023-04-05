@@ -48,7 +48,12 @@ def GetPosition(matchIds = []):
     sampledResults = SampleFromMatches(results)
     return sampledResults
 
-def ParseFile(file):
+def ParseFile(file : string):
+    """
+    Parses one replay file using clarity
+    :param  : file name of the form "<matchId>.dem"
+    :return : tuple of the form (matchId, list of strings)
+    """
     print(f"Parsing file {file}...")
     curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
     p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
@@ -76,6 +81,13 @@ def ParseFiles(replayFiles : list):
     for result in results:
         positionDict[result[0]] = result[1]
     return positionDict
+
+def BuildDataFrame(parsedOutput : list):
+    """
+    Gets a list of strings which is the parsed output for one replay
+    :param parsedOutput : List of strings
+    :return             : a dataframe object for one match
+    """
 
 def BuildDataFrames(positionDict : dict):
     """
