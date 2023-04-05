@@ -44,7 +44,6 @@ def GetODotaMatchData(matchIds: list):
 
 def getReplay(url,matchId):
     extType = str(matchId) + ".dem.bz2"
-    #fileNames.append(extType)
     print("downloading replay {}...".format(matchId))
     urllib.request.urlretrieve(url,extType)
     return extType
