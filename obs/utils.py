@@ -12,6 +12,7 @@ from io import StringIO
 from datetime import datetime
 from collections import defaultdict
 import shlex
+import concurrent.futures
 
 def GetODotaMatchData(matchIds: list):
     """
@@ -41,6 +42,13 @@ def GetODotaMatchData(matchIds: list):
             continue
     return (completeMatchMetails)
 
+def getReplay(url,matchId):
+    extType = str(matchId) + ".dem.bz2"
+    #fileNames.append(extType)
+    print("downloading replay {}...".format(matchId))
+    urllib.request.urlretrieve(url,extType)
+    return extType
+
 def DownloadReplays(matchIds: list):
     """
     Downloads match files in .bz2 format and extracts the files on to disk in the current working director
@@ -54,14 +62,15 @@ def DownloadReplays(matchIds: list):
     ctr = 1
     fileNames = [];
     print ("Downloading replays to current working directory..")
-    for match in matchIds:
-        extType = str(match) + ".dem.bz2"
-        fileNames.append(extType)
-        print("downloading replay {}/{} ...".format(ctr, len(matchIds)))
-        urllib.request.urlretrieve(matchIds[match]["replay_url"], extType)
-        ctr += 1
+    urls = [matchIds[match]["replay_url"] for match in matchIds]
+    matchIds = list(matchIds.keys())
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        fileNames = executor.map(getReplay, urls, matchIds)
+
     print("Done.")
     fileCount = 1
+    fileNames = list(fileNames)
     for file in fileNames:
         print("Decompressing file {}/{}".format(fileCount, len(fileNames)))
         if os.path.getsize(file) == 0:
