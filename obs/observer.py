@@ -13,6 +13,7 @@ from datetime import datetime
 from collections import defaultdict
 import shlex
 import obs.utils
+import concurrent.futures
 
 
 def GetPosition(matchIds = []):
@@ -46,6 +47,19 @@ def GetPosition(matchIds = []):
     results = BuildDataFrames(positionDict)
     sampledResults = SampleFromMatches(results)
     return sampledResults
+
+def ParseFile(file):
+    print(f"Parsing file {file}...")
+    curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
+    p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
+    output, err = p.communicate()
+    if output.decode("utf-8") == "":
+        print("Java Runtime Error. Please make sure a Java Runtime Environment is installed and can be found or the matchIDs are correct/exist")
+        return f'Error {file}'
+    p_status = p.wait()
+    return (file.split('.')[0], output.decode('utf-8').split('\n'))
+    
+    
 def ParseFiles(replayFiles : list):
 
     """
@@ -56,21 +70,11 @@ def ParseFiles(replayFiles : list):
     :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
     positionDict = {}
-    ctr = 1
-    for file in replayFiles:
-        print("Parsing file {}/{}..".format(ctr,len(replayFiles)))
-        curDir = "{}/{}".format(subprocess.run("pwd", capture_output=True).stdout.decode("utf-8").replace(" ","\ ").strip(),file)
-        p = subprocess.Popen("java -jar target/position.one-jar.jar '{}'".format(shlex.quote(curDir)), shell = True,cwd = './clarity-examples', stdout=subprocess.PIPE)
-        output, err = p.communicate()
-        #print("Output : {}".format(output.decode("utf-8")))
-        if output.decode("utf-8") == "":
-            print("Java Runtime Error. Please make sure a Java Runtime Environment is installed and can be found or the matchIDs are correct/exist")
-            return
-        positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
-        p_status = p.wait()
-        ctr+=1
-    print()
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = executor.map(ParseFile,replayFiles)
     print("Done")
+    for result in results:
+        positionDict[result[0]] = result[1]
     return positionDict
 
 def BuildDataFrames(positionDict : dict):
