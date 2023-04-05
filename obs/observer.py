@@ -59,8 +59,9 @@ def ParseFile(file):
         print("Java Runtime Error. Please make sure a Java Runtime Environment is installed and can be found or the matchIDs are correct/exist")
         return f'Error {file}'
     #positionDict[file.split('.')[0]] = output.decode('utf-8').split('\n')
-    return (file.split('.')[0], output.decode('utf-8').split('\n'))
     p_status = p.wait()
+    return (file.split('.')[0], output.decode('utf-8').split('\n'))
+    
     
 def ParseFiles(replayFiles : list):
 
@@ -89,8 +90,10 @@ def ParseFiles(replayFiles : list):
     #     ctr+=1
     # print()
     print("Done")
-    return results
-    #return positionDict
+    for result in results:
+        positionDict[result[0]] = result[1]
+    #return results
+    return positionDict
 
 def BuildDataFrames(positionDict : dict):
     """
