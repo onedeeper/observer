@@ -5,7 +5,6 @@ import numpy as np
 import shlex
 import obs.utils
 import concurrent.futures
-import traceback
 
 
 def GetPosition(matchIds = []):
@@ -133,7 +132,6 @@ def SampleFromMatch(dataFrame : pd.DataFrame, matchId : str):
         # convert each recording to milliseconds
         dataFrame['time'] = (dataFrame['time'] + firstTs) * 1000
         tEnd = dataFrame["time"].iloc[-1]
-        #print(firstTs, tEnd)
         if tEnd < firstTs:
             raise ValueError("Error during parsing. Data is missing")
         # number of 200 ms invervals
