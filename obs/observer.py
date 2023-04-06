@@ -1,19 +1,11 @@
 import subprocess
-import requests
-import json
 import os
 import pandas as pd
-import time
-import urllib.request
 import numpy as np
-import csv
-import glob
-from io import StringIO
-from datetime import datetime
-from collections import defaultdict
 import shlex
 import obs.utils
 import concurrent.futures
+import traceback
 
 
 def GetPosition(matchIds = []):
@@ -66,7 +58,6 @@ def ParseFile(file : str):
     
     
 def ParseFiles(replayFiles : list):
-
     """
     Parses replay files and extracts position data for each player across a match using
     the clarity parser
@@ -104,10 +95,7 @@ def BuildDataFrame(parsedOutput : list, matchId : str):
         # skip the last row which gives info about how long the parsing took
         return (matchId, df.iloc[0:-2])
     except:
-        print(f"Error parsing match {matchId}")
-        #return(matchId, f"Error parsing match")
-        
-        
+        return(f"Error converting match {matchId} to DataFrame. Likely due to missing data from incomplete parse.")
 
 def BuildDataFrames(positionDict : dict):
     """
@@ -116,37 +104,61 @@ def BuildDataFrames(positionDict : dict):
     :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
     dataFrameDict = {}
-    ctr = 1
     matchIds = list(positionDict.keys())
     parsedOutput = list(positionDict.values())
-    # TODO : Parallelize this
+
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = executor.map(BuildDataFrame,parsedOutput,matchIds)
-    #print(results.__next__())
+
     for result in results:
+        if isinstance(result, str):
+            print(result)
+            continue
         dataFrameDict[result[0]] = result[1]
-    # for matchId in positionDict.keys():
-    #     try:
-    #         # skip the first 10 rows which gives player assignments, not location
-    #         # TODO : Implement change so that dynamically determines last position entry
-    #         print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())))
-    #         series = pd.Series(positionDict[matchId])
-    #         firstPos = series.str.contains('_').idxmax()
-    #         series = series[firstPos:].reset_index(drop=True)
-    #         df = series.str.split(',', expand=True)
-    #         df = df.rename(columns={0: "player", 1: "x", 2: "y", 3: "z", 4: "time", 5: "mana", 6: "mana_regen",
-    #                                 7: "max_mana", 8: "hp", 9: "hp_regen", 10: "max_hp", 11: "xp", 12: "level",
-    #                                 13: "str", 14: "int", 15: "agi"})
-    #         # skip the last row which gives info about how long the parsing took
-    #         results[matchId] = df.iloc[0:-2]
-    #         ctr += 1
-    #     except:
-    #         print("Error parsing match {}".format(matchId))
-    #         ctr += 1
-    #         continue
-    # print()
     print("Done")
     return dataFrameDict
+
+def SampleFromMatch(dataFrame : pd.DataFrame, matchId : str):
+    """
+    Takes a dataframe consisting of the position data for all 10 players in a match and samples each player's
+    position every 200 ms. 
+
+    :param dataFrame : a dataframe of position data for all 10 players in a match
+    :return          : a double dictionary of match ids, player ids, and dataframes of position data
+    """
+    print(f"Sampling match {matchId} ...")
+    try:
+        dataFrame['time'] = pd.to_numeric(dataFrame['time'])
+        firstTs = abs(dataFrame["time"].iloc[0])
+        # convert each recording to milliseconds
+        dataFrame['time'] = (dataFrame['time'] + firstTs) * 1000
+        tEnd = dataFrame["time"].iloc[-1]
+        #print(firstTs, tEnd)
+        if tEnd < firstTs:
+            raise ValueError("Error during parsing. Data is missing")
+        # number of 200 ms invervals
+        ints = int(np.ceil(tEnd / 200))
+        # equally spaced (200 ms intervals) values from 0 to tEnd
+        timeArray = [i * 200 for i in range(1, ints + 1)]
+        timeIndex = np.zeros(ints)
+        playerDict = {}
+        for i in range(10):
+            player = 'Player_0{}'.format(i)
+            playerDf = dataFrame[dataFrame['player'] == player].reset_index()
+            arrayCtr = 0;
+            startTime = 0;
+            for i in range(1, len(playerDf)):
+                if (round(playerDf['time'].iloc[i], 3) >= startTime):
+                    timeIndex[arrayCtr] = playerDf['index'][i - 1]
+                    startTime += 200
+                    arrayCtr += 1
+            df = playerDf[playerDf['index'].isin(timeIndex[:arrayCtr + 1])].drop(columns="index").reset_index(drop=True)
+            df = pd.concat([df, df.iloc[[-1] * (len(timeArray) - len(df))]])
+            df['time'] = timeArray
+            playerDict[player] = df
+        return (matchId, playerDict)
+    except:
+        return(f"Error sampling match {matchId}. Dataframe of length {len(dataFrame)}. Error likely due to parsing error.")
 
 def SampleFromMatches(results : dict):
     """
@@ -156,40 +168,16 @@ def SampleFromMatches(results : dict):
     :return:  a double dictionary of match ids, player ids, and dataframes of position data
     """
     matchDict = {}
-    matchCtr = 1
-    for match in results:
-        print("Sampling match {}/{}".format(matchCtr, len(results)))
-        try:
-            results[match]['time'] = pd.to_numeric(results[match]['time'])
-            firstTs = abs(results[match].iloc[0]['time'])
-            # convert each recording to milliseconds
-            results[match]['time'] = (results[match]['time'] + firstTs) * 1000
-            tEnd = results[match].iloc[-1]['time']
-            # number of 200 ms invervals
-            ints = int(np.ceil(tEnd / 200))
-            # equally spaced (200 ms intervals) values from 0 to tEnd
-            timeArray = [i * 200 for i in range(1, ints + 1)]
-            timeIndex = np.zeros(ints)
-            playerDict = {}
-            for i in range(10):
-                player = 'Player_0{}'.format(i)
-                playerDf = results[match][results[match]['player'] == player].reset_index()
-                arrayCtr = 0;
-                startTime = 0;
-                for i in range(1, len(playerDf)):
-                    if (round(playerDf['time'].iloc[i], 3) >= startTime):
-                        timeIndex[arrayCtr] = playerDf['index'][i - 1]
-                        startTime += 200
-                        arrayCtr += 1
-                df = playerDf[playerDf['index'].isin(timeIndex[:arrayCtr + 1])].drop(columns="index").reset_index(drop=True)
-                df = pd.concat([df, df.iloc[[-1] * (len(timeArray) - len(df))]])
-                df['time'] = timeArray
-                playerDict[player] = df
-            matchCtr += 1
-            matchDict[match] = playerDict
-        except:
-            print("Error sampling match {}. Dataframe of length {}".format(match, len(results[match])))
-            matchCtr += 1
+    matchIds = list(results.keys())
+    matchDataFrame = list(results.values())
+
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = executor.map(SampleFromMatch,matchDataFrame,matchIds)
+
+    for result in results:
+        if isinstance(result, str):
+            print(result)
             continue
-    print("Done.")
+        matchDict[result[0]] = result[1]
+    print("Done")
     return matchDict
