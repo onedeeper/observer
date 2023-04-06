@@ -48,7 +48,7 @@ def GetPosition(matchIds = []):
     sampledResults = SampleFromMatches(results)
     return sampledResults
 
-def ParseFile(file : string):
+def ParseFile(file : str):
     """
     Parses one replay file using clarity
     :param  : file name of the form "<matchId>.dem"
@@ -82,12 +82,32 @@ def ParseFiles(replayFiles : list):
         positionDict[result[0]] = result[1]
     return positionDict
 
-def BuildDataFrame(parsedOutput : list):
+def BuildDataFrame(parsedOutput : list, matchId : str):
     """
-    Gets a list of strings which is the parsed output for one replay
+    Gets a list of strings which is the parsed output for one replay and builds a dataframe for one match
+    each row is one position reading for one player plus other metrics.
+
     :param parsedOutput : List of strings
     :return             : a dataframe object for one match
     """
+    try:
+        # skip the first 10 rows which gives player assignments, not location
+        # TODO : Implement change so that dynamically determines last position entry
+        print(f"Building dataframes {matchId}..")
+        series = pd.Series(parsedOutput)
+        firstPos = series.str.contains('_').idxmax()
+        series = series[firstPos:].reset_index(drop=True)
+        df = series.str.split(',', expand=True)
+        df = df.rename(columns={0: "player", 1: "x", 2: "y", 3: "z", 4: "time", 5: "mana", 6: "mana_regen",
+                                7: "max_mana", 8: "hp", 9: "hp_regen", 10: "max_hp", 11: "xp", 12: "level",
+                                13: "str", 14: "int", 15: "agi"})
+        # skip the last row which gives info about how long the parsing took
+        return (matchId, df.iloc[0:-2])
+    except:
+        print(f"Error parsing match {matchId}")
+        #return(matchId, f"Error parsing match")
+        
+        
 
 def BuildDataFrames(positionDict : dict):
     """
@@ -95,31 +115,38 @@ def BuildDataFrames(positionDict : dict):
     :param positionDict:
     :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
-    results = {}
+    dataFrameDict = {}
     ctr = 1
+    matchIds = list(positionDict.keys())
+    parsedOutput = list(positionDict.values())
     # TODO : Parallelize this
-    for matchId in positionDict.keys():
-        try:
-            # skip the first 10 rows which gives player assignments, not location
-            # TODO : Implement change so that dynamically determines last position entry
-            print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())))
-            series = pd.Series(positionDict[matchId])
-            firstPos = series.str.contains('_').idxmax()
-            series = series[firstPos:].reset_index(drop=True)
-            df = series.str.split(',', expand=True)
-            df = df.rename(columns={0: "player", 1: "x", 2: "y", 3: "z", 4: "time", 5: "mana", 6: "mana_regen",
-                                    7: "max_mana", 8: "hp", 9: "hp_regen", 10: "max_hp", 11: "xp", 12: "level",
-                                    13: "str", 14: "int", 15: "agi"})
-            # skip the last row which gives info about how long the parsing took
-            results[matchId] = df.iloc[0:-2]
-            ctr += 1
-        except:
-            print("Error parsing match {}".format(matchId))
-            ctr += 1
-            continue
-    print()
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = executor.map(BuildDataFrame,parsedOutput,matchIds)
+    #print(results.__next__())
+    for result in results:
+        dataFrameDict[result[0]] = result[1]
+    # for matchId in positionDict.keys():
+    #     try:
+    #         # skip the first 10 rows which gives player assignments, not location
+    #         # TODO : Implement change so that dynamically determines last position entry
+    #         print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())))
+    #         series = pd.Series(positionDict[matchId])
+    #         firstPos = series.str.contains('_').idxmax()
+    #         series = series[firstPos:].reset_index(drop=True)
+    #         df = series.str.split(',', expand=True)
+    #         df = df.rename(columns={0: "player", 1: "x", 2: "y", 3: "z", 4: "time", 5: "mana", 6: "mana_regen",
+    #                                 7: "max_mana", 8: "hp", 9: "hp_regen", 10: "max_hp", 11: "xp", 12: "level",
+    #                                 13: "str", 14: "int", 15: "agi"})
+    #         # skip the last row which gives info about how long the parsing took
+    #         results[matchId] = df.iloc[0:-2]
+    #         ctr += 1
+    #     except:
+    #         print("Error parsing match {}".format(matchId))
+    #         ctr += 1
+    #         continue
+    # print()
     print("Done")
-    return results
+    return dataFrameDict
 
 def SampleFromMatches(results : dict):
     """
