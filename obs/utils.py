@@ -43,6 +43,13 @@ def GetODotaMatchData(matchIds: list):
     return (completeMatchMetails)
 
 def getReplay(url,matchId):
+    """
+    Downloads one replay to the current working directory
+
+    :param  url     : the url to valve server for a given match
+            matchId : the Id of the match as integer
+    :return none
+    """
     extType = str(matchId) + ".dem.bz2"
     print("downloading replay {}...".format(matchId))
     urllib.request.urlretrieve(url,extType)
