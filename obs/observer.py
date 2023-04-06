@@ -1,16 +1,7 @@
 import subprocess
-import requests
-import json
 import os
 import pandas as pd
-import time
-import urllib.request
 import numpy as np
-import csv
-import glob
-from io import StringIO
-from datetime import datetime
-from collections import defaultdict
 import shlex
 import obs.utils
 import concurrent.futures
@@ -66,7 +57,6 @@ def ParseFile(file : str):
     
     
 def ParseFiles(replayFiles : list):
-
     """
     Parses replay files and extracts position data for each player across a match using
     the clarity parser
@@ -105,9 +95,6 @@ def BuildDataFrame(parsedOutput : list, matchId : str):
         return (matchId, df.iloc[0:-2])
     except:
         print(f"Error parsing match {matchId}")
-        #return(matchId, f"Error parsing match")
-        
-        
 
 def BuildDataFrames(positionDict : dict):
     """
@@ -116,37 +103,26 @@ def BuildDataFrames(positionDict : dict):
     :return: a double dictionary of match ids, player ids, and dataframes of position data
     """
     dataFrameDict = {}
-    ctr = 1
     matchIds = list(positionDict.keys())
     parsedOutput = list(positionDict.values())
-    # TODO : Parallelize this
+
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = executor.map(BuildDataFrame,parsedOutput,matchIds)
-    #print(results.__next__())
+
     for result in results:
         dataFrameDict[result[0]] = result[1]
-    # for matchId in positionDict.keys():
-    #     try:
-    #         # skip the first 10 rows which gives player assignments, not location
-    #         # TODO : Implement change so that dynamically determines last position entry
-    #         print("Building dataframes {}/{}..".format(ctr, len(positionDict.keys())))
-    #         series = pd.Series(positionDict[matchId])
-    #         firstPos = series.str.contains('_').idxmax()
-    #         series = series[firstPos:].reset_index(drop=True)
-    #         df = series.str.split(',', expand=True)
-    #         df = df.rename(columns={0: "player", 1: "x", 2: "y", 3: "z", 4: "time", 5: "mana", 6: "mana_regen",
-    #                                 7: "max_mana", 8: "hp", 9: "hp_regen", 10: "max_hp", 11: "xp", 12: "level",
-    #                                 13: "str", 14: "int", 15: "agi"})
-    #         # skip the last row which gives info about how long the parsing took
-    #         results[matchId] = df.iloc[0:-2]
-    #         ctr += 1
-    #     except:
-    #         print("Error parsing match {}".format(matchId))
-    #         ctr += 1
-    #         continue
-    # print()
     print("Done")
     return dataFrameDict
+
+def SampleFromMatch(dataFrame : pd.DataFrame, matchId : str):
+    """
+    Takes a dataframe consisting of the position data for all 10 players in a match and samples each player's
+    position every 200 ms. 
+
+    :param dataFrame : a dataframe of position data for all 10 players in a match
+    :return          : a double dictionary of match ids, player ids, and dataframes of position data
+    """
+    pass
 
 def SampleFromMatches(results : dict):
     """

@@ -1,17 +1,8 @@
 import subprocess
 import requests
-import json
 import os
-import pandas as pd
 import time
 import urllib.request
-import numpy as np
-import csv
-import glob
-from io import StringIO
-from datetime import datetime
-from collections import defaultdict
-import shlex
 import concurrent.futures
 
 def GetODotaMatchData(matchIds: list):
@@ -29,11 +20,10 @@ def GetODotaMatchData(matchIds: list):
         try:
             r = requests.get("https://api.opendota.com/api/matches/{}".format(match))
             if r.status_code == 404:
-                #print('test')
                 raise RuntimeError('Error : {} cannot be retrieved or does not exist '.format(match))
             print('Fetching match {}/{}'.format(ctr, len(matchIds)))
             completeMatchMetails[match] = r.json()
-            # OpenAPI has a max number of calls per minute
+            # Opendota API has a max number of calls per minute
             if len(matchIds) > 60:
                 time.sleep(11)
             ctr += 1
