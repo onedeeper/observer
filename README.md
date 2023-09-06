@@ -30,14 +30,9 @@ Observer uses this code to parse each replay file using some shell commands. The
 
 **Observer currently only works on mac/linux environments**
 
-Need a java runtime environment 
-Built on : 
+Install Java
 
-java version "1.8.0_351"
-
-Java(TM) SE Runtime Environment (build 1.8.0_351-b10)
-
-Java HotSpot(TM) 64-Bit Server VM (build 25.351-b10, mixed mode)
+https://www.java.com/en/download/manual.jsp
 
 ### Installing
 
