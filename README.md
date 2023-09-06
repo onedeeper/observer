@@ -67,6 +67,7 @@ Udesh Habaraduwa
 
 * 0.1
     * Initial Release
+    * Works for matches played between Jan 2021 and Dec 2022 (may work for matches earlier, has not been tested)
 
 ## License
 
