@@ -1,4 +1,6 @@
 
+**!!! There have been some breaking changes to the underlying parser. Please get a hold of we can try to get this to work again**
+
 # Observer : Dota 2 Time Series Data
 
 The goal of this package is to parse a Dota 2 replay and return time-locked information about all 10 heroes in the game.
